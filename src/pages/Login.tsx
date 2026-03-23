@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,9 +11,19 @@ import { toast } from 'sonner';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { user, role, loading: authLoading } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Auto-redirect when authenticated user with role is detected
+  useEffect(() => {
+    if (!authLoading && user && role) {
+      if (role === 'admin') navigate('/dashboard/admin', { replace: true });
+      else if (role === 'professor') navigate('/dashboard/professor', { replace: true });
+      else navigate('/dashboard/user', { replace: true });
+    }
+  }, [user, role, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
