@@ -5,8 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // ใส่ชื่อ Repository ของพี่ เพื่อให้ GitHub Pages หาไฟล์ assets เจอ
-  base: "/silk-heritage-vault/", 
+  // ใช้ ./ เพื่อให้มันเรียกไฟล์แบบ Relative Path (แก้ปัญหาหน้าขาว/404 ได้ชัวร์กว่า)
+  base: "./", 
   
   server: {
     host: "::",
@@ -26,7 +26,9 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
   build: {
-    // บังคับให้สร้างไฟล์ไว้ที่ dist (โฟลเดอร์มาตรฐานที่ GitHub Actions ใช้)
+    // โฟลเดอร์ปลายทางคือ dist (ถูกต้องแล้ว)
     outDir: "dist",
+    // เพิ่มตรงนี้เพื่อให้มั่นใจว่าชื่อไฟล์ assets จะไม่เพี้ยน
+    emptyOutDir: true,
   }
 }));
