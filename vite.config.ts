@@ -5,8 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // เพิ่มบรรทัดนี้เพื่อแก้ปัญหาหน้าขาวบน GitHub Pages
-  base: "/ชื่อ-repository-ของคุณ/", 
+  // แก้เป็นบรรทัดนี้ครับ ใช้ ./ จะได้ไม่ต้องกังวลเรื่องชื่อ Repo
+  base: "./", 
   
   server: {
     host: "::",
