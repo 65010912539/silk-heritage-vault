@@ -5,8 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // แก้เป็นบรรทัดนี้ครับ ใช้ ./ จะได้ไม่ต้องกังวลเรื่องชื่อ Repo
-  base: "./", 
+  // ใส่ชื่อ Repository ของพี่ เพื่อให้ GitHub Pages หาไฟล์ assets เจอ
+  base: "/silk-heritage-vault/", 
   
   server: {
     host: "::",
@@ -15,11 +15,18 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    mode === "development" && componentTagger(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
+  build: {
+    // บังคับให้สร้างไฟล์ไว้ที่ dist (โฟลเดอร์มาตรฐานที่ GitHub Actions ใช้)
+    outDir: "dist",
+  }
 }));
