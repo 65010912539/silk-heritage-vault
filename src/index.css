@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 40% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 13%;
+
+    --primary: 220 60% 22%;
+    --primary-foreground: 45 100% 90%;
+
+    --secondary: 45 90% 55%;
+    --secondary-foreground: 220 60% 15%;
+
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 45 90% 55%;
+    --accent-foreground: 220 60% 15%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 220 60% 22%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 220 60% 15%;
+    --sidebar-foreground: 220 15% 92%;
+    --sidebar-primary: 45 90% 55%;
+    --sidebar-primary-foreground: 220 60% 15%;
+    --sidebar-accent: 220 50% 22%;
+    --sidebar-accent-foreground: 220 15% 92%;
+    --sidebar-border: 220 50% 25%;
+    --sidebar-ring: 45 90% 55%;
+
+    --gold: 45 90% 55%;
+    --gold-light: 45 85% 75%;
+    --gold-dark: 45 80% 40%;
+    --navy: 220 60% 22%;
+    --navy-light: 220 45% 35%;
+    --navy-dark: 220 65% 12%;
+
+    --font-heading: 'Prompt', sans-serif;
+    --font-body: 'Sarabun', sans-serif;
+
+    --gradient-hero: linear-gradient(135deg, hsl(220 65% 12%), hsl(220 60% 22%), hsl(220 45% 35%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 80% 40%), hsl(45 90% 55%), hsl(45 85% 75%));
+    --shadow-card: 0 4px 20px -4px hsl(220 60% 22% / 0.12);
+    --shadow-elevated: 0 12px 40px -8px hsl(220 60% 22% / 0.2);
+  }
+
+  .dark {
+    --background: 220 40% 8%;
+    --foreground: 220 15% 92%;
+    --card: 220 35% 12%;
+    --card-foreground: 220 15% 92%;
+    --popover: 220 35% 12%;
+    --popover-foreground: 220 15% 92%;
+    --primary: 45 90% 55%;
+    --primary-foreground: 220 60% 12%;
+    --secondary: 220 50% 22%;
+    --secondary-foreground: 220 15% 92%;
+    --muted: 220 30% 18%;
+    --muted-foreground: 220 15% 60%;
+    --accent: 45 90% 55%;
+    --accent-foreground: 220 60% 12%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 30% 22%;
+    --input: 220 30% 22%;
+    --ring: 45 90% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer components {
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+}

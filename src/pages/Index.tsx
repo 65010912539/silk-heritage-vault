@@ -1,0 +1,104 @@
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import PatternCard from '@/components/PatternCard';
+import { Shield, Upload, Search } from 'lucide-react';
+
+const Index = () => {
+  const [approvedPatterns, setApprovedPatterns] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('silk_patterns')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(6)
+      .then(({ data }) => setApprovedPatterns(data || []));
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+
+      {/* Hero */}
+      <section className="gradient-hero py-24 md:py-36 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M30 0L60 30L30 60L0 30Z\' fill=\'none\' stroke=\'%23D4A843\' stroke-width=\'0.5\'/%3E%3C/svg%3E")', backgroundSize: '60px 60px' }} />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h1 className="font-heading text-4xl md:text-6xl font-bold text-secondary mb-6 animate-fade-in">
+            Thai<span className="text-primary-foreground">Silk</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-primary-foreground/80 mb-4 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            ระบบบันทึกลายผ้าไหมไทยภาคอีสาน
+          </p>
+          <p className="text-primary-foreground/60 mb-8 max-w-xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            อนุรักษ์มรดกทางวัฒนธรรม ด้วยเทคโนโลยีดิจิทัล
+          </p>
+          <div className="flex gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <Link to="/library">
+              <Button variant="secondary" size="lg" className="font-heading font-semibold">
+                <Search size={18} /> สำรวจคลังลายผ้า
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="outline" size="lg" className="font-heading font-semibold border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground">
+                เริ่มต้นใช้งาน
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Solutions */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="font-heading text-3xl font-bold text-center text-foreground mb-12">
+            ทำไมต้อง <span className="text-secondary">ThaiSilk</span>?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: Upload, title: 'บันทึกลายผ้า', desc: 'อัปโหลดภาพลายผ้าไหม พร้อมรายละเอียดที่มา จังหวัด และข้อมูลที่เกี่ยวข้อง' },
+              { icon: Shield, title: 'ตรวจสอบโดยผู้เชี่ยวชาญ', desc: 'ลายผ้าทุกลายผ่านการตรวจสอบจากผู้เชี่ยวชาญด้านผ้าไหมไทย' },
+              { icon: Search, title: 'คลังข้อมูลดิจิทัล', desc: 'ค้นหาและเรียนรู้ลายผ้าไหมจากทั่วภาคอีสาน ได้ทุกที่ทุกเวลา' },
+            ].map((item, i) => (
+              <div key={i} className="bg-card p-8 rounded-lg shadow-card text-center hover:shadow-elevated transition-shadow">
+                <div className="bg-secondary/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <item.icon size={28} className="text-secondary" />
+                </div>
+                <h3 className="font-heading text-lg font-semibold text-card-foreground mb-3">{item.title}</h3>
+                <p className="text-muted-foreground text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Showcase */}
+      {approvedPatterns.length > 0 && (
+        <section className="py-20 bg-muted">
+          <div className="container mx-auto px-4">
+            <h2 className="font-heading text-3xl font-bold text-center text-foreground mb-4">ลายผ้าที่ผ่านการตรวจสอบ</h2>
+            <p className="text-center text-muted-foreground mb-12">ตัวอย่างลายผ้าไหมจากคลังข้อมูลของเรา</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {approvedPatterns.map((p) => (
+                <PatternCard key={p.id} {...p} />
+              ))}
+            </div>
+            <div className="text-center mt-10">
+              <Link to="/library">
+                <Button variant="secondary" size="lg">ดูทั้งหมด</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Index;
