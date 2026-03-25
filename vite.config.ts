@@ -5,6 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // เพิ่มบรรทัดนี้เพื่อแก้ปัญหาหน้าขาวบน GitHub Pages
+  base: "/ชื่อ-repository-ของคุณ/", 
+  
   server: {
     host: "::",
     port: 8080,
