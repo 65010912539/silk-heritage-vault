@@ -4,12 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import StatCard from '@/components/StatCard';
 import { supabase } from '@/integrations/supabase/client';
-import { ClipboardCheck, CheckCircle, XCircle, Image, Bell, User, Clock, ListChecks } from 'lucide-react';
+import { ClipboardCheck, CheckCircle, XCircle, Image, Bell, User, Clock, ListChecks, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { MapPin, Calendar } from 'lucide-react';
+import ProfessorGuide from '@/pages/ProfessorGuide';
 
 const sidebarItems = [
   { label: 'แดชบอร์ด', path: '/dashboard/professor', icon: ClipboardCheck },
@@ -17,36 +18,43 @@ const sidebarItems = [
   { label: 'ตรวจแล้ว', path: '/dashboard/professor/reviewed', icon: ListChecks },
   { label: 'การแจ้งเตือน', path: '/dashboard/professor/notifications', icon: Bell },
   { label: 'โปรไฟล์', path: '/dashboard/professor/profile', icon: User },
+  { label: 'คู่มือการใช้งาน', path: '/dashboard/professor/guide', icon: BookOpen },
 ];
 
 const Overview = () => {
-  const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+  const { user } = useAuth();
+  const [stats, setStats] = useState({ pending: 0, myApproved: 0, myRejected: 0, myTotal: 0 });
   const [pendingPatterns, setPendingPatterns] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) return;
     const fetch = async () => {
-      const { data } = await supabase.from('silk_patterns').select('*').order('created_at', { ascending: false });
-      const all = data || [];
+      const [{ data: allPatterns }, { data: myPatterns }] = await Promise.all([
+        supabase.from('silk_patterns').select('*').eq('status', 'pending').order('created_at', { ascending: false }),
+        supabase.from('silk_patterns').select('*').eq('reviewer_id', user.id),
+      ]);
+      const pending = allPatterns || [];
+      const mine = myPatterns || [];
       setStats({
-        total: all.length,
-        pending: all.filter(p => p.status === 'pending').length,
-        approved: all.filter(p => p.status === 'approved').length,
-        rejected: all.filter(p => p.status === 'rejected').length,
+        pending: pending.length,
+        myApproved: mine.filter(p => p.status === 'approved').length,
+        myRejected: mine.filter(p => p.status === 'rejected').length,
+        myTotal: mine.length,
       });
-      setPendingPatterns(all.filter(p => p.status === 'pending').slice(0, 6));
+      setPendingPatterns(pending.slice(0, 6));
     };
     fetch();
-  }, []);
+  }, [user]);
 
   return (
     <div>
       <h1 className="font-heading text-2xl font-bold text-foreground mb-6">แดชบอร์ดผู้เชี่ยวชาญ</h1>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard title="ลายทั้งหมด" value={stats.total} icon={Image} color="navy" />
         <StatCard title="รอตรวจสอบ" value={stats.pending} icon={Clock} color="gold" />
-        <StatCard title="อนุมัติแล้ว" value={stats.approved} icon={CheckCircle} color="green" />
-        <StatCard title="ปฏิเสธ" value={stats.rejected} icon={XCircle} color="red" />
+        <StatCard title="ฉันอนุมัติแล้ว" value={stats.myApproved} icon={CheckCircle} color="green" />
+        <StatCard title="ฉันปฏิเสธ" value={stats.myRejected} icon={XCircle} color="red" />
+        <StatCard title="ฉันตรวจทั้งหมด" value={stats.myTotal} icon={Image} color="navy" />
       </div>
 
       {pendingPatterns.length > 0 && (
@@ -138,8 +146,8 @@ const ReviewPattern = () => {
               {selected.notes && <div><Label className="text-muted-foreground">คำอธิบาย</Label><p className="text-sm text-foreground">{selected.notes}</p></div>}
             </div>
             <div>
-              <Label>หมายเหตุจากผู้เชี่ยวชาญ</Label>
-              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={3} />
+              <Label>รายละเอียดจากผู้เชี่ยวชาญ</Label>
+              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={3} placeholder="กรอกรายละเอียด (ถ้ามี)" />
             </div>
             <div className="flex gap-3">
               <Button onClick={() => handleAction('approved')} disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-primary-foreground">
@@ -291,6 +299,7 @@ const ProfessorDashboard = () => {
           <Route path="reviewed" element={<ReviewedPatterns />} />
           <Route path="notifications" element={<ProfNotifications />} />
           <Route path="profile" element={<ProfProfile />} />
+          <Route path="guide" element={<ProfessorGuide />} />
         </Routes>
       </main>
     </div>

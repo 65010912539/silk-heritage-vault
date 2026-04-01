@@ -14,9 +14,10 @@ const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     firstName: '', lastName: '', username: '', password: '', rePassword: '', email: '', role: 'user' as 'user' | 'professor',
-    experience: '', 
+    experience: '', portfolioLink: '',
   });
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
@@ -30,7 +31,6 @@ const Register = () => {
 
     setLoading(true);
     try {
-      // Check username uniqueness
       const { data: existing } = await supabase.from('profiles').select('id').eq('username', form.username).maybeSingle();
       if (existing) { toast.error('ชื่อผู้ใช้นี้ถูกใช้แล้ว'); setLoading(false); return; }
 
@@ -54,6 +54,16 @@ const Register = () => {
         verificationUrl = urlData.publicUrl;
       }
 
+      // Upload resume PDF if professor
+      let resumeUrl = '';
+      if (form.role === 'professor' && resumeFile) {
+        const path = `${userId}/resume.pdf`;
+        const { error: uploadError } = await supabase.storage.from('resume-documents').upload(path, resumeFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('resume-documents').getPublicUrl(path);
+        resumeUrl = urlData.publicUrl;
+      }
+
       // Create profile
       const { error: profileError } = await supabase.from('profiles').insert({
         user_id: userId,
@@ -63,6 +73,8 @@ const Register = () => {
         email: form.email,
         experience: form.experience,
         verification_image_url: verificationUrl,
+        resume_url: resumeUrl,
+        portfolio_link: form.portfolioLink,
         status: form.role === 'professor' ? 'pending' : 'active',
       });
       if (profileError) throw profileError;
@@ -83,7 +95,6 @@ const Register = () => {
           : 'ยินดีต้อนรับสู่ ThaiSilk! คุณสามารถเริ่มอัปโหลดลายผ้าได้เลย',
       });
 
-      // Sign out since professor needs approval
       if (form.role === 'professor') {
         await supabase.auth.signOut();
         toast.success('สมัครสำเร็จ! กรุณารอการอนุมัติจากผู้ดูแลระบบ');
@@ -182,6 +193,14 @@ const Register = () => {
                 <div>
                   <Label>อัปโหลดรูปเพื่อยืนยัน</Label>
                   <Input type="file" accept="image/*" onChange={e => setVerificationFile(e.target.files?.[0] || null)} />
+                </div>
+                <div>
+                  <Label>ประวัติการทำงาน (PDF เท่านั้น)</Label>
+                  <Input type="file" accept=".pdf,application/pdf" onChange={e => setResumeFile(e.target.files?.[0] || null)} />
+                </div>
+                <div>
+                  <Label>ลิงค์ผลงาน</Label>
+                  <Input type="url" placeholder="https://..." value={form.portfolioLink} onChange={e => setForm({ ...form, portfolioLink: e.target.value })} />
                 </div>
               </>
             )}

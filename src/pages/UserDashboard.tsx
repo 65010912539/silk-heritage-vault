@@ -5,7 +5,7 @@ import DashboardSidebar from '@/components/DashboardSidebar';
 import StatCard from '@/components/StatCard';
 import PatternCard from '@/components/PatternCard';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Image, CheckCircle, XCircle, Bell, User, FolderOpen } from 'lucide-react';
+import { Upload, Image, CheckCircle, XCircle, Bell, User, FolderOpen, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ISAN_PROVINCES } from '@/lib/provinces';
 import { toast } from 'sonner';
+import UserGuide from '@/pages/UserGuide';
 
 const sidebarItems = [
   { label: 'แดชบอร์ด', path: '/dashboard/user', icon: FolderOpen },
@@ -20,6 +21,7 @@ const sidebarItems = [
   { label: 'ลายของฉัน', path: '/dashboard/user/my-patterns', icon: Image },
   { label: 'การแจ้งเตือน', path: '/dashboard/user/notifications', icon: Bell },
   { label: 'โปรไฟล์', path: '/dashboard/user/profile', icon: User },
+  { label: 'คู่มือการใช้งาน', path: '/dashboard/user/guide', icon: BookOpen },
 ];
 
 const Overview = () => {
@@ -71,6 +73,21 @@ const UploadPattern = () => {
   const [notes, setNotes] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
+    setFiles(selectedFiles);
+    if (selectedFiles) {
+      const urls: string[] = [];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        urls.push(URL.createObjectURL(selectedFiles[i]));
+      }
+      setPreviews(urls);
+    } else {
+      setPreviews([]);
+    }
+  };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,8 +116,19 @@ const UploadPattern = () => {
       });
       if (error) throw error;
 
+      // Notify all professors
+      const { data: profRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'professor');
+      if (profRoles && profRoles.length > 0) {
+        const notifications = profRoles.map(r => ({
+          user_id: r.user_id,
+          title: 'มีลายผ้าใหม่รอตรวจสอบ',
+          message: `ผู้ใช้ได้อัปโหลดลาย "${name}" เข้ามาในระบบ กรุณาเข้าตรวจสอบ`,
+        }));
+        await supabase.from('notifications').insert(notifications);
+      }
+
       toast.success('อัปโหลดลายผ้าสำเร็จ!');
-      setName(''); setProvince(''); setNotes(''); setFiles(null);
+      setName(''); setProvince(''); setNotes(''); setFiles(null); setPreviews([]);
     } catch (err: any) {
       toast.error(err.message || 'เกิดข้อผิดพลาด');
     } finally {
@@ -114,8 +142,15 @@ const UploadPattern = () => {
       <div className="bg-card rounded-lg shadow-card p-6 max-w-xl">
         <form onSubmit={handleUpload} className="space-y-4">
           <div>
-            <Label>รูปภาพลายผ้า (อย่างน้อย 1 รูป)</Label>
-            <Input type="file" accept="image/*" multiple required onChange={e => setFiles(e.target.files)} />
+            <Label>รูปภาพลายผ้า (เลือกได้หลายรูป)</Label>
+            <Input type="file" accept="image/*" multiple required onChange={handleFileChange} />
+            {previews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {previews.map((url, i) => (
+                  <img key={i} src={url} alt={`preview ${i}`} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <Label>ชื่อลาย</Label>
@@ -256,6 +291,7 @@ const UserDashboard = () => {
           <Route path="my-patterns/:id" element={<MyPatterns />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="guide" element={<UserGuide />} />
         </Routes>
       </main>
     </div>
