@@ -13,6 +13,7 @@ import UserDashboard from "./pages/UserDashboard";
 import ProfessorDashboard from "./pages/ProfessorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -21,11 +22,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      {/* เปลี่ยนจาก BrowserRouter เป็น HashRouter เพื่อให้รันบน GitHub Pages ได้เสถียร */}
       <HashRouter>
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/library" element={<Library />} />

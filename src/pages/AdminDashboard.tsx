@@ -351,7 +351,22 @@ const ApproveProfessors = () => {
               <p className="text-sm text-muted-foreground">อีเมล: {p.email}</p>
               {p.experience && <p className="text-sm text-foreground"><strong>ประสบการณ์:</strong> {p.experience}</p>}
               {p.verification_image_url && (
-                <img src={p.verification_image_url} alt="หลักฐาน" className="w-full max-w-xs rounded-lg" />
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">รูปยืนยัน:</p>
+                  <img src={p.verification_image_url} alt="หลักฐาน" className="w-full max-w-xs rounded-lg" />
+                </div>
+              )}
+              {p.resume_url && (
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">ประวัติการทำงาน (PDF):</p>
+                  <a href={p.resume_url} target="_blank" rel="noopener noreferrer" className="text-sm text-secondary hover:underline">ดูเอกสาร PDF</a>
+                </div>
+              )}
+              {p.portfolio_link && (
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">ลิงค์ผลงาน:</p>
+                  <a href={p.portfolio_link} target="_blank" rel="noopener noreferrer" className="text-sm text-secondary hover:underline">{p.portfolio_link}</a>
+                </div>
               )}
               <div className="flex gap-3">
                 <Button onClick={() => handleAction(p.user_id, 'active')} className="bg-emerald-600 hover:bg-emerald-700 text-primary-foreground">อนุมัติ</Button>
