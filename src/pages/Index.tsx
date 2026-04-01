@@ -37,10 +37,15 @@ const Index = () => {
           <p className="text-primary-foreground/60 mb-8 max-w-xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
             อนุรักษ์มรดกทางวัฒนธรรม ด้วยเทคโนโลยีดิจิทัล
           </p>
-          <div className="flex gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="flex gap-4 justify-center flex-wrap animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <Link to="/library">
               <Button variant="secondary" size="lg" className="font-heading font-semibold">
                 <Search size={18} /> สำรวจคลังลายผ้า
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button variant="outline" size="lg" className="font-heading font-semibold border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground">
+                เกี่ยวกับเรา
               </Button>
             </Link>
             <Link to="/register">
