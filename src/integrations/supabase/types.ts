@@ -50,6 +50,8 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
+          portfolio_link: string | null
+          resume_url: string | null
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           user_id: string
@@ -64,6 +66,8 @@ export type Database = {
           first_name: string
           id?: string
           last_name: string
+          portfolio_link?: string | null
+          resume_url?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           user_id: string
@@ -78,6 +82,8 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string
+          portfolio_link?: string | null
+          resume_url?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           user_id?: string
