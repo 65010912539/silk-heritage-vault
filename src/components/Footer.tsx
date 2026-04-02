@@ -16,11 +16,8 @@ const Footer = () => (
         </div>
         <div>
           <h4 className="font-heading font-semibold mb-3 text-secondary">ติดต่อ</h4>
-          <p className="text-sm text-primary-foreground/70">อีเมล: contact@thaisilk.com</p>
+          <p className="text-sm text-primary-foreground/70">อีเมล : 65010912539@msu.ac.th</p>
         </div>
-      </div>
-      <div className="border-t border-primary-foreground/20 mt-8 pt-6 text-center text-sm text-primary-foreground/50">
-        © 2026 ThaiSilk. สงวนลิขสิทธิ์.
       </div>
     </div>
   </footer>

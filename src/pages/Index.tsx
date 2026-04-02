@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import PatternCard from '@/components/PatternCard';
-import { Shield, Upload, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const Index = () => {
   const [approvedPatterns, setApprovedPatterns] = useState<any[]>([]);
@@ -43,40 +43,11 @@ const Index = () => {
                 <Search size={18} /> สำรวจคลังลายผ้า
               </Button>
             </Link>
-            <Link to="/about">
-              <Button variant="outline" size="lg" className="font-heading font-semibold border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground">
-                เกี่ยวกับเรา
-              </Button>
-            </Link>
             <Link to="/register">
               <Button variant="outline" size="lg" className="font-heading font-semibold border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground">
                 เริ่มต้นใช้งาน
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Solutions */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <h2 className="font-heading text-3xl font-bold text-center text-foreground mb-12">
-            ทำไมต้อง <span className="text-secondary">ThaiSilk</span>?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: Upload, title: 'บันทึกลายผ้า', desc: 'อัปโหลดภาพลายผ้าไหม พร้อมรายละเอียดที่มา จังหวัด และข้อมูลที่เกี่ยวข้อง' },
-              { icon: Shield, title: 'ตรวจสอบโดยผู้เชี่ยวชาญ', desc: 'ลายผ้าทุกลายผ่านการตรวจสอบจากผู้เชี่ยวชาญด้านผ้าไหมไทย' },
-              { icon: Search, title: 'คลังข้อมูลดิจิทัล', desc: 'ค้นหาและเรียนรู้ลายผ้าไหมจากทั่วภาคอีสาน ได้ทุกที่ทุกเวลา' },
-            ].map((item, i) => (
-              <div key={i} className="bg-card p-8 rounded-lg shadow-card text-center hover:shadow-elevated transition-shadow">
-                <div className="bg-secondary/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <item.icon size={28} className="text-secondary" />
-                </div>
-                <h3 className="font-heading text-lg font-semibold text-card-foreground mb-3">{item.title}</h3>
-                <p className="text-muted-foreground text-sm">{item.desc}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
