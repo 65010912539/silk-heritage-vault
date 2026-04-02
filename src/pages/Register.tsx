@@ -95,6 +95,17 @@ const Register = () => {
           : 'ยินดีต้อนรับสู่ ThaiSilk! คุณสามารถเริ่มอัปโหลดลายผ้าได้เลย',
       });
 
+      // Notify all admins about new registration
+      const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
+      if (adminRoles && adminRoles.length > 0) {
+        const adminNotifs = adminRoles.map(r => ({
+          user_id: r.user_id,
+          title: form.role === 'professor' ? 'มีผู้สมัครผู้เชี่ยวชาญใหม่' : 'มีผู้สมัครสมาชิกใหม่',
+          message: `${form.firstName} ${form.lastName} (${form.username}) ได้สมัคร${form.role === 'professor' ? 'ผู้เชี่ยวชาญ' : 'สมาชิก'}เข้ามาในระบบ`,
+        }));
+        await supabase.from('notifications').insert(adminNotifs);
+      }
+
       if (form.role === 'professor') {
         await supabase.auth.signOut();
         toast.success('สมัครสำเร็จ! กรุณารอการอนุมัติจากผู้ดูแลระบบ');
