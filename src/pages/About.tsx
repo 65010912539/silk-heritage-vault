@@ -1,6 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { GraduationCap, BookOpen, Users, Shield } from 'lucide-react';
+import { GraduationCap, BookOpen } from 'lucide-react';
 
 const About = () => {
   return (
@@ -38,31 +38,6 @@ const About = () => {
                 นอกจากนี้ ระบบยังมีผู้เชี่ยวชาญในการตรวจสอบและยืนยันความถูกต้องของข้อมูล
                 เพื่อให้ข้อมูลที่เผยแพร่มีความน่าเชื่อถือ และสามารถนำไปใช้เป็นแหล่งอ้างอิงได้
               </p>
-            </div>
-          </section>
-
-          {/* ระบบการทำงาน */}
-          <section className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-card rounded-lg shadow-card p-6 text-center">
-              <div className="bg-secondary/20 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Users size={24} className="text-secondary" />
-              </div>
-              <h3 className="font-heading font-semibold text-card-foreground mb-2">ผู้ใช้งานทั่วไป</h3>
-              <p className="text-sm text-muted-foreground">อัปโหลดลวดลายผ้าไหม พร้อมรายละเอียด เพื่อร่วมอนุรักษ์มรดกทางวัฒนธรรม</p>
-            </div>
-            <div className="bg-card rounded-lg shadow-card p-6 text-center">
-              <div className="bg-secondary/20 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Shield size={24} className="text-secondary" />
-              </div>
-              <h3 className="font-heading font-semibold text-card-foreground mb-2">ผู้เชี่ยวชาญ</h3>
-              <p className="text-sm text-muted-foreground">ตรวจสอบและยืนยันความถูกต้องของลวดลายผ้า เพื่อความน่าเชื่อถือของข้อมูล</p>
-            </div>
-            <div className="bg-card rounded-lg shadow-card p-6 text-center">
-              <div className="bg-secondary/20 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3">
-                <GraduationCap size={24} className="text-secondary" />
-              </div>
-              <h3 className="font-heading font-semibold text-card-foreground mb-2">ผู้ดูแลระบบ</h3>
-              <p className="text-sm text-muted-foreground">จัดการผู้ใช้งาน ผู้เชี่ยวชาญ และดูแลระบบให้ทำงานอย่างมีประสิทธิภาพ</p>
             </div>
           </section>
 

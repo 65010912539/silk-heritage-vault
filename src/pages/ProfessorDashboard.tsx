@@ -111,7 +111,7 @@ const ReviewPattern = () => {
       reviewed_at: new Date().toISOString(),
     }).eq('id', selected.id);
 
-    // Notify user
+    // Notify the uploader
     await supabase.from('notifications').insert({
       user_id: selected.user_id,
       title: action === 'approved' ? 'ลายผ้าได้รับการอนุมัติ' : 'ลายผ้าไม่ผ่านการตรวจสอบ',
@@ -119,6 +119,17 @@ const ReviewPattern = () => {
         ? `ลาย "${selected.name}" ได้รับการอนุมัติแล้ว`
         : `ลาย "${selected.name}" ไม่ผ่านการตรวจสอบ${reviewNotes ? ': ' + reviewNotes : ''}`,
     });
+
+    // Notify all admins
+    const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
+    if (adminRoles && adminRoles.length > 0) {
+      const adminNotifs = adminRoles.map(r => ({
+        user_id: r.user_id,
+        title: action === 'approved' ? 'ผู้เชี่ยวชาญอนุมัติลายผ้า' : 'ผู้เชี่ยวชาญปฏิเสธลายผ้า',
+        message: `ลาย "${selected.name}" ถูก${action === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}โดยผู้เชี่ยวชาญ`,
+      }));
+      await supabase.from('notifications').insert(adminNotifs);
+    }
 
     toast.success(action === 'approved' ? 'อนุมัติลายผ้าแล้ว' : 'ปฏิเสธลายผ้าแล้ว');
     setSelected(null);

@@ -21,12 +21,11 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-primary-foreground/80 hover:text-secondary transition-colors font-medium">หน้าแรก</Link>
           <Link to="/library" className="text-primary-foreground/80 hover:text-secondary transition-colors font-medium">คลังลายผ้า</Link>
+          <Link to="/about" className="text-primary-foreground/80 hover:text-secondary transition-colors font-medium">เกี่ยวกับเรา</Link>
           {user ? (
-            <>
-              <Link to={dashboardPath}>
-                <Button variant="secondary" size="sm">แดชบอร์ด</Button>
-              </Link>
-            </>
+            <Link to={dashboardPath}>
+              <Button variant="secondary" size="sm">แดชบอร์ด</Button>
+            </Link>
           ) : (
             <>
               <Link to="/login">
@@ -50,6 +49,7 @@ const Navbar = () => {
         <div className="md:hidden bg-primary border-t border-primary/20 p-4 flex flex-col gap-3">
           <Link to="/" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">หน้าแรก</Link>
           <Link to="/library" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">คลังลายผ้า</Link>
+          <Link to="/about" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">เกี่ยวกับเรา</Link>
           {user ? (
             <Link to={dashboardPath} onClick={() => setOpen(false)} className="text-secondary py-2">แดชบอร์ด</Link>
           ) : (
