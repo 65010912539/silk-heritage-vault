@@ -5,7 +5,7 @@ import DashboardSidebar from '@/components/DashboardSidebar';
 import StatCard from '@/components/StatCard';
 import PatternCard from '@/components/PatternCard';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Image, CheckCircle, XCircle, Bell, User, FolderOpen, BookOpen } from 'lucide-react';
+import { Upload, Image, CheckCircle, XCircle, Bell, User, FolderOpen, BookOpen, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -71,34 +71,37 @@ const UploadPattern = () => {
   const [name, setName] = useState('');
   const [province, setProvince] = useState('');
   const [notes, setNotes] = useState('');
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
-    setFiles(selectedFiles);
-    if (selectedFiles) {
-      const urls: string[] = [];
-      for (let i = 0; i < selectedFiles.length; i++) {
-        urls.push(URL.createObjectURL(selectedFiles[i]));
-      }
-      setPreviews(urls);
-    } else {
-      setPreviews([]);
-    }
+    const newFiles = e.target.files;
+    if (!newFiles) return;
+    const newFilesArr = Array.from(newFiles);
+    setSelectedFiles(prev => [...prev, ...newFilesArr]);
+    const newPreviews = newFilesArr.map(f => URL.createObjectURL(f));
+    setPreviews(prev => [...prev, ...newPreviews]);
+    // Reset input so same file can be added again
+    e.target.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    URL.revokeObjectURL(previews[index]);
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!files || files.length === 0) { toast.error('กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป'); return; }
+    if (selectedFiles.length === 0) { toast.error('กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป'); return; }
 
     setLoading(true);
     try {
       const imageUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
         const ext = file.name.split('.').pop();
         const path = `${user.id}/${Date.now()}_${i}.${ext}`;
         const { error } = await supabase.storage.from('silk-images').upload(path, file);
@@ -127,8 +130,19 @@ const UploadPattern = () => {
         await supabase.from('notifications').insert(notifications);
       }
 
+      // Notify all admins
+      const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
+      if (adminRoles && adminRoles.length > 0) {
+        const adminNotifs = adminRoles.map(r => ({
+          user_id: r.user_id,
+          title: 'มีการอัปโหลดลายผ้าใหม่',
+          message: `ผู้ใช้ได้อัปโหลดลาย "${name}" เข้ามาในระบบ`,
+        }));
+        await supabase.from('notifications').insert(adminNotifs);
+      }
+
       toast.success('อัปโหลดลายผ้าสำเร็จ!');
-      setName(''); setProvince(''); setNotes(''); setFiles(null); setPreviews([]);
+      setName(''); setProvince(''); setNotes(''); setSelectedFiles([]); setPreviews([]);
     } catch (err: any) {
       toast.error(err.message || 'เกิดข้อผิดพลาด');
     } finally {
@@ -143,13 +157,25 @@ const UploadPattern = () => {
         <form onSubmit={handleUpload} className="space-y-4">
           <div>
             <Label>รูปภาพลายผ้า (เลือกได้หลายรูป)</Label>
-            <Input type="file" accept="image/*" multiple required onChange={handleFileChange} />
+            <Input type="file" accept="image/*" multiple onChange={handleFileChange} />
             {previews.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {previews.map((url, i) => (
-                  <img key={i} src={url} alt={`preview ${i}`} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                  <div key={i} className="relative group">
+                    <img src={url} alt={`preview ${i}`} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
                 ))}
               </div>
+            )}
+            {selectedFiles.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-1">เลือกแล้ว {selectedFiles.length} รูป</p>
             )}
           </div>
           <div>

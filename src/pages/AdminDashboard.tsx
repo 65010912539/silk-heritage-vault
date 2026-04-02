@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import StatCard from '@/components/StatCard';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, GraduationCap, Image, Clock, CheckCircle, XCircle, Bell, Settings, FileText, UserPlus, Shield } from 'lucide-react';
+import { Users, GraduationCap, Image, Clock, CheckCircle, XCircle, Bell, UserPlus, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,9 +18,7 @@ const sidebarItems = [
   { label: 'จัดการลายผ้า', path: '/dashboard/admin/patterns', icon: Image },
   { label: 'อนุมัติผู้เชี่ยวชาญ', path: '/dashboard/admin/approve-professors', icon: CheckCircle },
   { label: 'เพิ่ม Admin', path: '/dashboard/admin/add-admin', icon: UserPlus },
-  { label: 'รายงาน', path: '/dashboard/admin/reports', icon: FileText },
   { label: 'การแจ้งเตือน', path: '/dashboard/admin/notifications', icon: Bell },
-  { label: 'ตั้งค่า', path: '/dashboard/admin/settings', icon: Settings },
 ];
 
 const PIE_COLORS = ['hsl(45, 90%, 55%)', 'hsl(142, 71%, 45%)', 'hsl(0, 72%, 51%)'];
@@ -50,7 +48,6 @@ const Overview = () => {
         rejected: allPatterns.filter(p => p.status === 'rejected').length,
       });
 
-      // Province chart
       const provinceMap: Record<string, number> = {};
       allPatterns.forEach(p => {
         const prov = p.province || 'ไม่ระบุ';
@@ -381,32 +378,27 @@ const ApproveProfessors = () => {
 };
 
 const AddAdmin = () => {
+  const { user } = useAuth();
   const [form, setForm] = useState({ username: '', password: '', rePassword: '', email: '' });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== form.rePassword) { toast.error('รหัสผ่านไม่ตรงกัน'); return; }
+    if (form.password.length < 6) { toast.error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'); return; }
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
-      if (error) throw error;
-      if (!data.user) throw new Error('ไม่สามารถสร้างบัญชีได้');
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
+      if (!token) throw new Error('ไม่พบ session');
 
-      await supabase.from('profiles').insert({
-        user_id: data.user.id,
-        first_name: 'Admin',
-        last_name: form.username,
-        username: form.username,
-        email: form.email,
-        status: 'active',
+      const res = await supabase.functions.invoke('create-admin', {
+        body: { username: form.username, email: form.email, password: form.password },
       });
 
-      await supabase.from('user_roles').insert({
-        user_id: data.user.id,
-        role: 'admin',
-      });
+      if (res.error) throw new Error(res.error.message || 'เกิดข้อผิดพลาด');
+      if (res.data?.error) throw new Error(res.data.error);
 
       toast.success('เพิ่ม Admin สำเร็จ!');
       setForm({ username: '', password: '', rePassword: '', email: '' });
@@ -432,13 +424,6 @@ const AddAdmin = () => {
     </div>
   );
 };
-
-const Reports = () => (
-  <div>
-    <h1 className="font-heading text-2xl font-bold text-foreground mb-6">รายงาน</h1>
-    <p className="text-muted-foreground">ฟีเจอร์ Export รายงานจะเปิดให้ใช้งานเร็วๆ นี้</p>
-  </div>
-);
 
 const AdminNotifications = () => {
   const { user } = useAuth();
@@ -470,35 +455,6 @@ const AdminNotifications = () => {
   );
 };
 
-const AdminSettings = () => {
-  const [settings, setSettings] = useState({ site_name: '', description: '' });
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    supabase.from('site_settings').select('*').limit(1).single().then(({ data }) => {
-      if (data) setSettings({ site_name: data.site_name, description: data.description || '' });
-    });
-  }, []);
-
-  const handleSave = async () => {
-    setSaving(true);
-    await supabase.from('site_settings').update(settings).not('id', 'is', null);
-    toast.success('บันทึกการตั้งค่าแล้ว');
-    setSaving(false);
-  };
-
-  return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">ตั้งค่า</h1>
-      <div className="bg-card rounded-lg shadow-card p-6 max-w-md space-y-4">
-        <div><Label>ชื่อเว็บไซต์</Label><Input value={settings.site_name} onChange={e => setSettings({ ...settings, site_name: e.target.value })} /></div>
-        <div><Label>คำอธิบาย</Label><Input value={settings.description} onChange={e => setSettings({ ...settings, description: e.target.value })} /></div>
-        <Button onClick={handleSave} disabled={saving}>{saving ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
-      </div>
-    </div>
-  );
-};
-
 const AdminDashboard = () => {
   const { user, role, loading } = useAuth();
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">กำลังโหลด...</div>;
@@ -515,9 +471,7 @@ const AdminDashboard = () => {
           <Route path="patterns" element={<ManagePatterns />} />
           <Route path="approve-professors" element={<ApproveProfessors />} />
           <Route path="add-admin" element={<AddAdmin />} />
-          <Route path="reports" element={<Reports />} />
           <Route path="notifications" element={<AdminNotifications />} />
-          <Route path="settings" element={<AdminSettings />} />
         </Routes>
       </main>
     </div>
