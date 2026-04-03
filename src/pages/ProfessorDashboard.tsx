@@ -48,9 +48,9 @@ const Overview = () => {
   }, [user]);
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">แดชบอร์ดผู้เชี่ยวชาญ</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="animate-fade-in">
+      <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground mb-4 md:mb-6">แดชบอร์ดผู้เชี่ยวชาญ</h1>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <StatCard title="รอตรวจสอบ" value={stats.pending} icon={Clock} color="gold" />
         <StatCard title="ฉันอนุมัติแล้ว" value={stats.myApproved} icon={CheckCircle} color="green" />
         <StatCard title="ฉันปฏิเสธ" value={stats.myRejected} icon={XCircle} color="red" />
@@ -59,16 +59,16 @@ const Overview = () => {
 
       {pendingPatterns.length > 0 && (
         <>
-          <h2 className="font-heading text-lg font-semibold text-foreground mb-4">ลายที่รอตรวจสอบ</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h2 className="font-heading text-base md:text-lg font-semibold text-foreground mb-4">ลายที่รอตรวจสอบ</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {pendingPatterns.map(p => (
-              <div key={p.id} className="bg-card rounded-lg shadow-card overflow-hidden cursor-pointer hover:shadow-elevated transition-all" onClick={() => navigate(`/dashboard/professor/review/${p.id}`)}>
+              <div key={p.id} className="bg-card rounded-lg shadow-card overflow-hidden cursor-pointer hover:shadow-elevated transition-all duration-300 hover:-translate-y-1" onClick={() => navigate(`/dashboard/professor/review/${p.id}`)}>
                 <div className="aspect-[4/3] bg-muted">
                   {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
                 </div>
-                <div className="p-4">
-                  <h3 className="font-heading font-semibold text-card-foreground">{p.name}</h3>
-                  <p className="text-sm text-muted-foreground">{p.province || 'ไม่ระบุจังหวัด'}</p>
+                <div className="p-3 md:p-4">
+                  <h3 className="font-heading font-semibold text-card-foreground text-sm md:text-base">{p.name}</h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">{p.province || 'ไม่ระบุจังหวัด'}</p>
                   <Button size="sm" className="mt-2 w-full">ตรวจสอบ</Button>
                 </div>
               </div>
