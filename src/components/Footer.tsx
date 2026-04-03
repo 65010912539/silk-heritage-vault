@@ -1,9 +1,9 @@
 const Footer = () => (
-  <footer className="bg-primary text-primary-foreground py-12">
+  <footer className="bg-primary text-primary-foreground py-8 md:py-12">
     <div className="container mx-auto px-4">
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
         <div>
-          <h3 className="font-heading text-xl font-bold text-secondary mb-3">ThaiSilk</h3>
+          <h3 className="font-heading text-lg md:text-xl font-bold text-secondary mb-3">ThaiSilk</h3>
           <p className="text-primary-foreground/70 text-sm">ระบบบันทึกลายผ้าไหมไทยภาคอีสาน เพื่ออนุรักษ์มรดกทางวัฒนธรรม</p>
         </div>
         <div>

@@ -46,9 +46,9 @@ const Overview = () => {
   }, [user]);
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">แดชบอร์ดผู้ใช้</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="animate-fade-in">
+      <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground mb-4 md:mb-6">แดชบอร์ดผู้ใช้</h1>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <StatCard title="อัปโหลดทั้งหมด" value={stats.total} icon={Upload} color="navy" />
         <StatCard title="รอตรวจสอบ" value={stats.pending} icon={Image} color="gold" />
         <StatCard title="ผ่านแล้ว" value={stats.approved} icon={CheckCircle} color="green" />
@@ -56,8 +56,8 @@ const Overview = () => {
       </div>
       {recentPatterns.length > 0 && (
         <>
-          <h2 className="font-heading text-lg font-semibold text-foreground mb-4">ลายผ้าล่าสุด</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h2 className="font-heading text-base md:text-lg font-semibold text-foreground mb-4">ลายผ้าล่าสุด</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentPatterns.map(p => <PatternCard key={p.id} {...p} linkPrefix="/dashboard/user/my-patterns" />)}
           </div>
         </>
@@ -309,7 +309,7 @@ const UserDashboard = () => {
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar items={sidebarItems} title="User Dashboard" />
-      <main className="flex-1 p-6 md:p-8 overflow-auto">
+      <main className="flex-1 p-4 pt-18 md:pt-6 md:p-8 overflow-auto">
         <Routes>
           <Route index element={<Overview />} />
           <Route path="upload" element={<UploadPattern />} />

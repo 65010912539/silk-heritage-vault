@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { LogIn } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,7 +17,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Auto-redirect when authenticated user with role is detected
   useEffect(() => {
     if (!authLoading && user && role) {
       if (role === 'admin') navigate('/dashboard/admin', { replace: true });
@@ -30,7 +30,6 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Look up email by username
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('email, status, user_id')
@@ -43,14 +42,12 @@ const Login = () => {
         return;
       }
 
-      // Check suspension
       if (profile.status === 'suspended') {
         toast.error('บัญชีของคุณถูกระงับ กรุณาติดต่อผู้ดูแลระบบ');
         setLoading(false);
         return;
       }
 
-      // Check pending professor
       if (profile.status === 'pending') {
         toast.error('บัญชีของคุณอยู่ระหว่างรอการอนุมัติจากผู้ดูแลระบบ');
         setLoading(false);
@@ -63,7 +60,6 @@ const Login = () => {
         return;
       }
 
-      // Sign in with email
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: profile.email,
         password,
@@ -75,7 +71,6 @@ const Login = () => {
         return;
       }
 
-      // Get role
       const { data: roleData } = await supabase
         .from('user_roles')
         .select('role')
@@ -98,18 +93,23 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1 flex items-center justify-center py-12 px-4 bg-muted">
-        <div className="bg-card rounded-lg shadow-elevated p-8 w-full max-w-md">
-          <h1 className="font-heading text-2xl font-bold text-center text-foreground mb-6">เข้าสู่ระบบ</h1>
+      <div className="flex-1 flex items-center justify-center py-8 md:py-12 px-4 bg-muted">
+        <div className="bg-card rounded-xl shadow-elevated p-6 md:p-8 w-full max-w-md animate-scale-in">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-full mb-4">
+              <LogIn size={24} className="text-primary" />
+            </div>
+            <h1 className="font-heading text-2xl font-bold text-foreground">เข้าสู่ระบบ</h1>
+          </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <Label>ชื่อผู้ใช้ (Username)</Label>
-              <Input required value={username} onChange={e => setUsername(e.target.value)} />
+              <Input required value={username} onChange={e => setUsername(e.target.value)} className="mt-1" />
             </div>
             <div>
               <Label>รหัสผ่าน</Label>
-              <Input type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+              <Input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="mt-1" />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
