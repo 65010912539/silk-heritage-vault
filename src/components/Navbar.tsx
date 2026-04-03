@@ -12,8 +12,8 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-primary/20">
-      <div className="container mx-auto px-4 flex items-center justify-between h-16">
-        <Link to="/" className="font-heading text-2xl font-bold text-secondary">
+      <div className="container mx-auto px-4 flex items-center justify-between h-14 md:h-16">
+        <Link to="/" className="font-heading text-xl md:text-2xl font-bold text-secondary">
           Thai<span className="text-primary-foreground">Silk</span>
         </Link>
 
@@ -39,27 +39,27 @@ const Navbar = () => {
         </div>
 
         {/* Mobile toggle */}
-        <button className="md:hidden text-primary-foreground" onClick={() => setOpen(!open)}>
-          {open ? <X size={24} /> : <Menu size={24} />}
+        <button className="md:hidden text-primary-foreground p-1" onClick={() => setOpen(!open)}>
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
       {/* Mobile menu */}
-      {open && (
-        <div className="md:hidden bg-primary border-t border-primary/20 p-4 flex flex-col gap-3">
-          <Link to="/" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">หน้าแรก</Link>
-          <Link to="/library" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">คลังลายผ้า</Link>
-          <Link to="/about" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">เกี่ยวกับเรา</Link>
+      <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="bg-primary border-t border-primary/20 p-4 flex flex-col gap-2">
+          <Link to="/" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2.5 px-3 rounded-lg hover:bg-primary/50 transition-colors">หน้าแรก</Link>
+          <Link to="/library" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2.5 px-3 rounded-lg hover:bg-primary/50 transition-colors">คลังลายผ้า</Link>
+          <Link to="/about" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2.5 px-3 rounded-lg hover:bg-primary/50 transition-colors">เกี่ยวกับเรา</Link>
           {user ? (
-            <Link to={dashboardPath} onClick={() => setOpen(false)} className="text-secondary py-2">แดชบอร์ด</Link>
+            <Link to={dashboardPath} onClick={() => setOpen(false)} className="text-secondary py-2.5 px-3 rounded-lg hover:bg-primary/50 transition-colors font-medium">แดชบอร์ด</Link>
           ) : (
             <>
-              <Link to="/login" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2">เข้าสู่ระบบ</Link>
-              <Link to="/register" onClick={() => setOpen(false)} className="text-secondary py-2">สมัครสมาชิก</Link>
+              <Link to="/login" onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-secondary py-2.5 px-3 rounded-lg hover:bg-primary/50 transition-colors">เข้าสู่ระบบ</Link>
+              <Link to="/register" onClick={() => setOpen(false)} className="text-secondary py-2.5 px-3 rounded-lg hover:bg-primary/50 transition-colors font-medium">สมัครสมาชิก</Link>
             </>
           )}
         </div>
-      )}
+      </div>
     </nav>
   );
 };
