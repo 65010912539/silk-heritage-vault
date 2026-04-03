@@ -302,7 +302,7 @@ const ProfessorDashboard = () => {
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar items={sidebarItems} title="Professor Dashboard" />
-      <main className="flex-1 p-6 md:p-8 overflow-auto">
+      <main className="flex-1 p-4 pt-18 md:pt-6 md:p-8 overflow-auto">
         <Routes>
           <Route index element={<Overview />} />
           <Route path="pending" element={<ReviewPattern />} />
