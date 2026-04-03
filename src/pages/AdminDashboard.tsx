@@ -67,7 +67,7 @@ const Overview = () => {
   return (
     <div>
       <h1 className="font-heading text-2xl font-bold text-foreground mb-6">แดชบอร์ดผู้ดูแลระบบ</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 mb-8">
         <StatCard title="ผู้ใช้ทั้งหมด" value={stats.users || 0} icon={Users} color="navy" />
         <StatCard title="ผู้เชี่ยวชาญ" value={stats.professors || 0} icon={GraduationCap} color="gold" />
         <StatCard title="ลายผ้าทั้งหมด" value={stats.totalPatterns || 0} icon={Image} color="navy" />
