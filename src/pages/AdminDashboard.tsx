@@ -139,14 +139,14 @@ const ManageUsers = () => {
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">จัดการผู้ใช้</h1>
+      <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground mb-6">จัดการผู้ใช้</h1>
       <div className="bg-card rounded-lg shadow-card overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-[600px]">
           <thead className="bg-muted">
             <tr>
               <th className="text-left p-3 font-heading">ชื่อ</th>
               <th className="text-left p-3 font-heading">Username</th>
-              <th className="text-left p-3 font-heading">อีเมล</th>
+              <th className="text-left p-3 font-heading hidden sm:table-cell">อีเมล</th>
               <th className="text-left p-3 font-heading">สถานะ</th>
               <th className="text-left p-3 font-heading">จัดการ</th>
             </tr>
@@ -156,17 +156,19 @@ const ManageUsers = () => {
               <tr key={u.id} className="border-t border-border">
                 <td className="p-3 text-foreground">{u.first_name} {u.last_name}</td>
                 <td className="p-3 text-foreground">{u.username}</td>
-                <td className="p-3 text-muted-foreground">{u.email}</td>
+                <td className="p-3 text-muted-foreground hidden sm:table-cell">{u.email}</td>
                 <td className="p-3">
                   <span className={`px-2 py-1 rounded text-xs ${u.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                     {u.status === 'active' ? 'ใช้งาน' : 'ระงับ'}
                   </span>
                 </td>
-                <td className="p-3 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleSuspend(u.user_id, u.status)}>
-                    {u.status === 'suspended' ? 'เปิดใช้งาน' : 'ระงับ'}
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(u.user_id)}>ลบ</Button>
+                <td className="p-3">
+                  <div className="flex gap-2 flex-wrap">
+                    <Button size="sm" variant="outline" onClick={() => handleSuspend(u.user_id, u.status)}>
+                      {u.status === 'suspended' ? 'เปิดใช้งาน' : 'ระงับ'}
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(u.user_id)}>ลบ</Button>
+                  </div>
                 </td>
               </tr>
             ))}
