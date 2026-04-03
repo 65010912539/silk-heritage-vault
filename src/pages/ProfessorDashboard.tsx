@@ -139,26 +139,26 @@ const ReviewPattern = () => {
 
   if (selected) {
     return (
-      <div>
+      <div className="animate-fade-in">
         <Button variant="ghost" onClick={() => setSelected(null)} className="mb-4">← กลับ</Button>
-        <h1 className="font-heading text-2xl font-bold text-foreground mb-6">ตรวจสอบลายผ้า</h1>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="space-y-4">
+        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground mb-4 md:mb-6">ตรวจสอบลายผ้า</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <div className="space-y-3 md:space-y-4">
             {selected.images?.map((img: string, i: number) => (
               <img key={i} src={img} alt={selected.name} className="w-full rounded-lg shadow-card" />
             ))}
           </div>
           <div className="space-y-4">
-            <div className="bg-card p-6 rounded-lg shadow-card space-y-3">
-              <h2 className="font-heading text-xl font-bold text-card-foreground">{selected.name}</h2>
-              {selected.province && <p className="flex items-center gap-2 text-foreground"><MapPin size={16} className="text-secondary" /> {selected.province}</p>}
-              <p className="flex items-center gap-2 text-foreground"><Calendar size={16} className="text-secondary" /> {new Date(selected.created_at).toLocaleDateString('th-TH')}</p>
-              {uploader && <p className="flex items-center gap-2 text-foreground"><User size={16} className="text-secondary" /> {uploader.first_name} {uploader.last_name}</p>}
+            <div className="bg-card p-4 md:p-6 rounded-lg shadow-card space-y-3">
+              <h2 className="font-heading text-lg md:text-xl font-bold text-card-foreground">{selected.name}</h2>
+              {selected.province && <p className="flex items-center gap-2 text-foreground text-sm md:text-base"><MapPin size={16} className="text-secondary shrink-0" /> {selected.province}</p>}
+              <p className="flex items-center gap-2 text-foreground text-sm md:text-base"><Calendar size={16} className="text-secondary shrink-0" /> {new Date(selected.created_at).toLocaleDateString('th-TH')}</p>
+              {uploader && <p className="flex items-center gap-2 text-foreground text-sm md:text-base"><User size={16} className="text-secondary shrink-0" /> {uploader.first_name} {uploader.last_name}</p>}
               {selected.notes && <div><Label className="text-muted-foreground">คำอธิบาย</Label><p className="text-sm text-foreground">{selected.notes}</p></div>}
             </div>
             <div>
               <Label>รายละเอียดจากผู้เชี่ยวชาญ</Label>
-              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={3} placeholder="กรอกรายละเอียด (ถ้ามี)" />
+              <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={3} placeholder="กรอกรายละเอียด (ถ้ามี)" className="mt-1" />
             </div>
             <div className="flex gap-3">
               <Button onClick={() => handleAction('approved')} disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-primary-foreground">
