@@ -41,39 +41,8 @@ export type Database = {
         }
         Relationships: []
       }
-      pattern_reports: {
-        Row: {
-          admin_response: string | null
-          created_at: string
-          id: string
-          pattern_id: string
-          reason: string
-          reporter_id: string
-          status: string
-        }
-        Insert: {
-          admin_response?: string | null
-          created_at?: string
-          id?: string
-          pattern_id: string
-          reason: string
-          reporter_id: string
-          status?: string
-        }
-        Update: {
-          admin_response?: string | null
-          created_at?: string
-          id?: string
-          pattern_id?: string
-          reason?: string
-          reporter_id?: string
-          status?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
-          avatar_url: string | null
           bio: string | null
           created_at: string
           email: string
@@ -90,7 +59,6 @@ export type Database = {
           verification_image_url: string | null
         }
         Insert: {
-          avatar_url?: string | null
           bio?: string | null
           created_at?: string
           email: string
@@ -107,7 +75,6 @@ export type Database = {
           verification_image_url?: string | null
         }
         Update: {
-          avatar_url?: string | null
           bio?: string | null
           created_at?: string
           email?: string
@@ -236,7 +203,7 @@ export type Database = {
     Enums: {
       account_status: "active" | "pending" | "suspended" | "rejected"
       app_role: "user" | "professor" | "admin"
-      pattern_status: "pending" | "approved" | "rejected" | "suspended"
+      pattern_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -366,7 +333,7 @@ export const Constants = {
     Enums: {
       account_status: ["active", "pending", "suspended", "rejected"],
       app_role: ["user", "professor", "admin"],
-      pattern_status: ["pending", "approved", "rejected", "suspended"],
+      pattern_status: ["pending", "approved", "rejected"],
     },
   },
 } as const

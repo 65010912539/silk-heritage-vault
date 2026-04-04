@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import StatCard from '@/components/StatCard';
 import PatternCard from '@/components/PatternCard';
-import AvatarUpload from '@/components/AvatarUpload';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Image, CheckCircle, XCircle, Bell, User, FolderOpen, BookOpen, X, ArrowLeft } from 'lucide-react';
+import { Upload, Image, CheckCircle, XCircle, Bell, User, FolderOpen, BookOpen, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -69,7 +68,6 @@ const Overview = () => {
 
 const UploadPattern = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [province, setProvince] = useState('');
   const [notes, setNotes] = useState('');
@@ -84,6 +82,7 @@ const UploadPattern = () => {
     setSelectedFiles(prev => [...prev, ...newFilesArr]);
     const newPreviews = newFilesArr.map(f => URL.createObjectURL(f));
     setPreviews(prev => [...prev, ...newPreviews]);
+    // Reset input so same file can be added again
     e.target.value = '';
   };
 
@@ -112,31 +111,34 @@ const UploadPattern = () => {
       }
 
       const { error } = await supabase.from('silk_patterns').insert({
-        user_id: user.id, name,
+        user_id: user.id,
+        name,
         province: province || null,
         notes: notes || null,
         images: imageUrls,
       });
       if (error) throw error;
 
-      // Notify professors
+      // Notify all professors
       const { data: profRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'professor');
-      if (profRoles?.length) {
-        await supabase.from('notifications').insert(profRoles.map(r => ({
+      if (profRoles && profRoles.length > 0) {
+        const notifications = profRoles.map(r => ({
           user_id: r.user_id,
           title: 'มีลายผ้าใหม่รอตรวจสอบ',
           message: `ผู้ใช้ได้อัปโหลดลาย "${name}" เข้ามาในระบบ กรุณาเข้าตรวจสอบ`,
-        })));
+        }));
+        await supabase.from('notifications').insert(notifications);
       }
 
-      // Notify admins
+      // Notify all admins
       const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
-      if (adminRoles?.length) {
-        await supabase.from('notifications').insert(adminRoles.map(r => ({
+      if (adminRoles && adminRoles.length > 0) {
+        const adminNotifs = adminRoles.map(r => ({
           user_id: r.user_id,
           title: 'มีการอัปโหลดลายผ้าใหม่',
           message: `ผู้ใช้ได้อัปโหลดลาย "${name}" เข้ามาในระบบ`,
-        })));
+        }));
+        await supabase.from('notifications').insert(adminNotifs);
       }
 
       toast.success('อัปโหลดลายผ้าสำเร็จ!');
@@ -149,40 +151,53 @@ const UploadPattern = () => {
   };
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/user')} className="shrink-0"><ArrowLeft size={18} /></Button>
-        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">อัปโหลดลายผ้า</h1>
-      </div>
-      <div className="bg-card rounded-2xl shadow-card p-6 max-w-xl">
-        <form onSubmit={handleUpload} className="space-y-5">
+    <div>
+      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">อัปโหลดลายผ้า</h1>
+      <div className="bg-card rounded-lg shadow-card p-6 max-w-xl">
+        <form onSubmit={handleUpload} className="space-y-4">
           <div>
             <Label>รูปภาพลายผ้า (เลือกได้หลายรูป)</Label>
-            <Input type="file" accept="image/*" multiple onChange={handleFileChange} className="mt-1" />
+            <Input type="file" accept="image/*" multiple onChange={handleFileChange} />
             {previews.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-3">
+              <div className="grid grid-cols-3 gap-2 mt-2">
                 {previews.map((url, i) => (
-                  <div key={i} className="relative group rounded-xl overflow-hidden">
-                    <img src={url} alt={`preview ${i}`} className="w-full aspect-square object-cover" />
-                    <button type="button" onClick={() => removeFile(i)} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md">
+                  <div key={i} className="relative group">
+                    <img src={url} alt={`preview ${i}`} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                       <X size={12} />
                     </button>
                   </div>
                 ))}
               </div>
             )}
-            {selectedFiles.length > 0 && <p className="text-xs text-muted-foreground mt-1">เลือกแล้ว {selectedFiles.length} รูป</p>}
+            {selectedFiles.length > 0 && (
+              <p className="text-xs text-muted-foreground mt-1">เลือกแล้ว {selectedFiles.length} รูป</p>
+            )}
           </div>
-          <div><Label>ชื่อลาย</Label><Input required value={name} onChange={e => setName(e.target.value)} className="mt-1" /></div>
+          <div>
+            <Label>ชื่อลาย</Label>
+            <Input required value={name} onChange={e => setName(e.target.value)} />
+          </div>
           <div>
             <Label>จังหวัด (ถ้าทราบ)</Label>
             <Select value={province} onValueChange={setProvince}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="เลือกจังหวัด" /></SelectTrigger>
-              <SelectContent>{ISAN_PROVINCES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+              <SelectTrigger><SelectValue placeholder="เลือกจังหวัด" /></SelectTrigger>
+              <SelectContent>
+                {ISAN_PROVINCES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
             </Select>
           </div>
-          <div><Label>หมายเหตุ</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} className="mt-1" /></div>
-          <Button type="submit" disabled={loading} className="w-full">{loading ? 'กำลังอัปโหลด...' : 'อัปโหลดลายผ้า'}</Button>
+          <div>
+            <Label>หมายเหตุ</Label>
+            <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
+          </div>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'กำลังอัปโหลด...' : 'อัปโหลดลายผ้า'}
+          </Button>
         </form>
       </div>
     </div>
@@ -191,7 +206,6 @@ const UploadPattern = () => {
 
 const MyPatterns = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [patterns, setPatterns] = useState<any[]>([]);
 
   useEffect(() => {
@@ -201,11 +215,8 @@ const MyPatterns = () => {
   }, [user]);
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/user')} className="shrink-0"><ArrowLeft size={18} /></Button>
-        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">ลายของฉัน</h1>
-      </div>
+    <div>
+      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">ลายของฉัน</h1>
       {patterns.length === 0 ? (
         <p className="text-muted-foreground">ยังไม่มีลายผ้าที่อัปโหลด</p>
       ) : (
@@ -219,7 +230,6 @@ const MyPatterns = () => {
 
 const Notifications = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
@@ -229,17 +239,14 @@ const Notifications = () => {
   }, [user]);
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/user')} className="shrink-0"><ArrowLeft size={18} /></Button>
-        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">การแจ้งเตือน</h1>
-      </div>
+    <div>
+      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">การแจ้งเตือน</h1>
       {notifications.length === 0 ? (
         <p className="text-muted-foreground">ไม่มีการแจ้งเตือน</p>
       ) : (
         <div className="space-y-3">
           {notifications.map(n => (
-            <div key={n.id} className={`bg-card p-4 rounded-xl shadow-card transition-all hover:shadow-elevated ${!n.is_read ? 'border-l-4 border-secondary' : ''}`}>
+            <div key={n.id} className={`bg-card p-4 rounded-lg shadow-card ${!n.is_read ? 'border-l-4 border-secondary' : ''}`}>
               <h3 className="font-heading font-semibold text-card-foreground">{n.title}</h3>
               <p className="text-sm text-muted-foreground">{n.message}</p>
               <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleString('th-TH')}</p>
@@ -253,7 +260,6 @@ const Notifications = () => {
 
 const Profile = () => {
   const { profile, refreshProfile } = useAuth();
-  const navigate = useNavigate();
   const [bio, setBio] = useState(profile?.bio || '');
   const [saving, setSaving] = useState(false);
 
@@ -269,25 +275,26 @@ const Profile = () => {
   if (!profile) return null;
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/user')} className="shrink-0"><ArrowLeft size={18} /></Button>
-        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">โปรไฟล์</h1>
-      </div>
-      <div className="bg-card rounded-2xl shadow-card p-6 max-w-xl space-y-6">
-        <div className="flex justify-center">
-          <AvatarUpload />
+    <div>
+      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">โปรไฟล์</h1>
+      <div className="bg-card rounded-lg shadow-card p-6 max-w-xl space-y-4">
+        <div>
+          <Label className="text-muted-foreground">ชื่อ</Label>
+          <p className="font-medium text-foreground">{profile.first_name} {profile.last_name}</p>
         </div>
-        <div className="space-y-4">
-          <div><Label className="text-muted-foreground text-xs">ชื่อ</Label><p className="font-medium text-foreground">{profile.first_name} {profile.last_name}</p></div>
-          <div><Label className="text-muted-foreground text-xs">ชื่อผู้ใช้</Label><p className="font-medium text-foreground">{profile.username}</p></div>
-          <div><Label className="text-muted-foreground text-xs">อีเมล</Label><p className="font-medium text-foreground">{profile.email}</p></div>
-          <div>
-            <Label>คำอธิบายตัวเอง</Label>
-            <Textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} className="mt-1" />
-          </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+        <div>
+          <Label className="text-muted-foreground">ชื่อผู้ใช้</Label>
+          <p className="font-medium text-foreground">{profile.username}</p>
         </div>
+        <div>
+          <Label className="text-muted-foreground">อีเมล</Label>
+          <p className="font-medium text-foreground">{profile.email}</p>
+        </div>
+        <div>
+          <Label>คำอธิบายตัวเอง</Label>
+          <Textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} />
+        </div>
+        <Button onClick={handleSave} disabled={saving}>{saving ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
       </div>
     </div>
   );
@@ -295,6 +302,7 @@ const Profile = () => {
 
 const UserDashboard = () => {
   const { user, role, loading } = useAuth();
+
   if (loading) return <div className="flex items-center justify-center min-h-screen text-muted-foreground">กำลังโหลด...</div>;
   if (!user || role !== 'user') return <Navigate to="/login" />;
 
