@@ -3,8 +3,9 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import StatCard from '@/components/StatCard';
+import AvatarUpload from '@/components/AvatarUpload';
 import { supabase } from '@/integrations/supabase/client';
-import { ClipboardCheck, CheckCircle, XCircle, Image, Bell, User, Clock, ListChecks, BookOpen } from 'lucide-react';
+import { ClipboardCheck, CheckCircle, XCircle, Image, Bell, User, Clock, ListChecks, BookOpen, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -23,9 +24,9 @@ const sidebarItems = [
 
 const Overview = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ pending: 0, myApproved: 0, myRejected: 0, myTotal: 0 });
   const [pendingPatterns, setPendingPatterns] = useState<any[]>([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
@@ -56,16 +57,13 @@ const Overview = () => {
         <StatCard title="ฉันปฏิเสธ" value={stats.myRejected} icon={XCircle} color="red" />
         <StatCard title="ฉันตรวจทั้งหมด" value={stats.myTotal} icon={Image} color="navy" />
       </div>
-
       {pendingPatterns.length > 0 && (
         <>
           <h2 className="font-heading text-base md:text-lg font-semibold text-foreground mb-4">ลายที่รอตรวจสอบ</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {pendingPatterns.map(p => (
-              <div key={p.id} className="bg-card rounded-lg shadow-card overflow-hidden cursor-pointer hover:shadow-elevated transition-all duration-300 hover:-translate-y-1" onClick={() => navigate(`/dashboard/professor/review/${p.id}`)}>
-                <div className="aspect-[4/3] bg-muted">
-                  {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
-                </div>
+              <div key={p.id} className="bg-card rounded-xl shadow-card overflow-hidden cursor-pointer hover:shadow-elevated transition-all duration-300 hover:-translate-y-1" onClick={() => navigate(`/dashboard/professor/review/${p.id}`)}>
+                <div className="aspect-[4/3] bg-muted">{p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}</div>
                 <div className="p-3 md:p-4">
                   <h3 className="font-heading font-semibold text-card-foreground text-sm md:text-base">{p.name}</h3>
                   <p className="text-xs md:text-sm text-muted-foreground">{p.province || 'ไม่ระบุจังหวัด'}</p>
@@ -105,30 +103,22 @@ const ReviewPattern = () => {
     if (!selected || !user) return;
     setLoading(true);
     await supabase.from('silk_patterns').update({
-      status: action,
-      reviewer_id: user.id,
-      reviewer_notes: reviewNotes,
-      reviewed_at: new Date().toISOString(),
+      status: action, reviewer_id: user.id, reviewer_notes: reviewNotes, reviewed_at: new Date().toISOString(),
     }).eq('id', selected.id);
 
-    // Notify the uploader
     await supabase.from('notifications').insert({
       user_id: selected.user_id,
       title: action === 'approved' ? 'ลายผ้าได้รับการอนุมัติ' : 'ลายผ้าไม่ผ่านการตรวจสอบ',
-      message: action === 'approved'
-        ? `ลาย "${selected.name}" ได้รับการอนุมัติแล้ว`
-        : `ลาย "${selected.name}" ไม่ผ่านการตรวจสอบ${reviewNotes ? ': ' + reviewNotes : ''}`,
+      message: action === 'approved' ? `ลาย "${selected.name}" ได้รับการอนุมัติแล้ว` : `ลาย "${selected.name}" ไม่ผ่านการตรวจสอบ${reviewNotes ? ': ' + reviewNotes : ''}`,
     });
 
-    // Notify all admins
     const { data: adminRoles } = await supabase.from('user_roles').select('user_id').eq('role', 'admin');
-    if (adminRoles && adminRoles.length > 0) {
-      const adminNotifs = adminRoles.map(r => ({
+    if (adminRoles?.length) {
+      await supabase.from('notifications').insert(adminRoles.map(r => ({
         user_id: r.user_id,
         title: action === 'approved' ? 'ผู้เชี่ยวชาญอนุมัติลายผ้า' : 'ผู้เชี่ยวชาญปฏิเสธลายผ้า',
         message: `ลาย "${selected.name}" ถูก${action === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}โดยผู้เชี่ยวชาญ`,
-      }));
-      await supabase.from('notifications').insert(adminNotifs);
+      })));
     }
 
     toast.success(action === 'approved' ? 'อนุมัติลายผ้าแล้ว' : 'ปฏิเสธลายผ้าแล้ว');
@@ -140,16 +130,16 @@ const ReviewPattern = () => {
   if (selected) {
     return (
       <div className="animate-fade-in">
-        <Button variant="ghost" onClick={() => setSelected(null)} className="mb-4">← กลับ</Button>
+        <Button variant="ghost" onClick={() => setSelected(null)} className="mb-4 gap-2"><ArrowLeft size={16} /> กลับ</Button>
         <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground mb-4 md:mb-6">ตรวจสอบลายผ้า</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           <div className="space-y-3 md:space-y-4">
             {selected.images?.map((img: string, i: number) => (
-              <img key={i} src={img} alt={selected.name} className="w-full rounded-lg shadow-card" />
+              <img key={i} src={img} alt={selected.name} className="w-full rounded-xl shadow-card" />
             ))}
           </div>
           <div className="space-y-4">
-            <div className="bg-card p-4 md:p-6 rounded-lg shadow-card space-y-3">
+            <div className="bg-card p-4 md:p-6 rounded-xl shadow-card space-y-3">
               <h2 className="font-heading text-lg md:text-xl font-bold text-card-foreground">{selected.name}</h2>
               {selected.province && <p className="flex items-center gap-2 text-foreground text-sm md:text-base"><MapPin size={16} className="text-secondary shrink-0" /> {selected.province}</p>}
               <p className="flex items-center gap-2 text-foreground text-sm md:text-base"><Calendar size={16} className="text-secondary shrink-0" /> {new Date(selected.created_at).toLocaleDateString('th-TH')}</p>
@@ -161,12 +151,8 @@ const ReviewPattern = () => {
               <Textarea value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={3} placeholder="กรอกรายละเอียด (ถ้ามี)" className="mt-1" />
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => handleAction('approved')} disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-primary-foreground">
-                <CheckCircle size={18} /> อนุมัติ
-              </Button>
-              <Button onClick={() => handleAction('rejected')} disabled={loading} variant="destructive" className="flex-1">
-                <XCircle size={18} /> ปฏิเสธ
-              </Button>
+              <Button onClick={() => handleAction('approved')} disabled={loading} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-primary-foreground"><CheckCircle size={18} /> อนุมัติ</Button>
+              <Button onClick={() => handleAction('rejected')} disabled={loading} variant="destructive" className="flex-1"><XCircle size={18} /> ปฏิเสธ</Button>
             </div>
           </div>
         </div>
@@ -175,22 +161,17 @@ const ReviewPattern = () => {
   }
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">รอตรวจสอบ</h1>
-      {patterns.length === 0 ? (
-        <p className="text-muted-foreground">ไม่มีลายผ้าที่รอตรวจสอบ</p>
-      ) : (
+    <div className="animate-fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/professor')} className="shrink-0"><ArrowLeft size={18} /></Button>
+        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">รอตรวจสอบ</h1>
+      </div>
+      {patterns.length === 0 ? <p className="text-muted-foreground">ไม่มีลายผ้าที่รอตรวจสอบ</p> : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {patterns.map(p => (
-            <div key={p.id} className="bg-card rounded-lg shadow-card overflow-hidden cursor-pointer hover:shadow-elevated transition-all" onClick={() => selectPattern(p)}>
-              <div className="aspect-[4/3] bg-muted">
-                {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
-              </div>
-              <div className="p-4">
-                <h3 className="font-heading font-semibold text-card-foreground">{p.name}</h3>
-                <p className="text-sm text-muted-foreground">{p.province || 'ไม่ระบุจังหวัด'}</p>
-                <Button size="sm" className="mt-2 w-full">ตรวจสอบ</Button>
-              </div>
+            <div key={p.id} className="bg-card rounded-xl shadow-card overflow-hidden cursor-pointer hover:shadow-elevated transition-all" onClick={() => selectPattern(p)}>
+              <div className="aspect-[4/3] bg-muted">{p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}</div>
+              <div className="p-4"><h3 className="font-heading font-semibold text-card-foreground">{p.name}</h3><p className="text-sm text-muted-foreground">{p.province || 'ไม่ระบุจังหวัด'}</p><Button size="sm" className="mt-2 w-full">ตรวจสอบ</Button></div>
             </div>
           ))}
         </div>
@@ -201,6 +182,7 @@ const ReviewPattern = () => {
 
 const ReviewedPatterns = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [patterns, setPatterns] = useState<any[]>([]);
 
   useEffect(() => {
@@ -210,17 +192,16 @@ const ReviewedPatterns = () => {
   }, [user]);
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">ตรวจแล้ว</h1>
-      {patterns.length === 0 ? (
-        <p className="text-muted-foreground">ยังไม่มีลายผ้าที่ตรวจแล้ว</p>
-      ) : (
+    <div className="animate-fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/professor')} className="shrink-0"><ArrowLeft size={18} /></Button>
+        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">ตรวจแล้ว</h1>
+      </div>
+      {patterns.length === 0 ? <p className="text-muted-foreground">ยังไม่มีลายผ้าที่ตรวจแล้ว</p> : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {patterns.map(p => (
-            <div key={p.id} className="bg-card rounded-lg shadow-card overflow-hidden">
-              <div className="aspect-[4/3] bg-muted">
-                {p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}
-              </div>
+            <div key={p.id} className="bg-card rounded-xl shadow-card overflow-hidden">
+              <div className="aspect-[4/3] bg-muted">{p.images?.[0] && <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />}</div>
               <div className="p-4">
                 <h3 className="font-heading font-semibold text-card-foreground">{p.name}</h3>
                 <span className={`inline-block mt-1 px-2 py-1 rounded text-xs font-medium ${p.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
@@ -237,6 +218,7 @@ const ReviewedPatterns = () => {
 
 const ProfNotifications = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
@@ -246,14 +228,15 @@ const ProfNotifications = () => {
   }, [user]);
 
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">การแจ้งเตือน</h1>
-      {notifications.length === 0 ? (
-        <p className="text-muted-foreground">ไม่มีการแจ้งเตือน</p>
-      ) : (
+    <div className="animate-fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/professor')} className="shrink-0"><ArrowLeft size={18} /></Button>
+        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">การแจ้งเตือน</h1>
+      </div>
+      {notifications.length === 0 ? <p className="text-muted-foreground">ไม่มีการแจ้งเตือน</p> : (
         <div className="space-y-3">
           {notifications.map(n => (
-            <div key={n.id} className={`bg-card p-4 rounded-lg shadow-card ${!n.is_read ? 'border-l-4 border-secondary' : ''}`}>
+            <div key={n.id} className={`bg-card p-4 rounded-xl shadow-card transition-all hover:shadow-elevated ${!n.is_read ? 'border-l-4 border-secondary' : ''}`}>
               <h3 className="font-heading font-semibold text-card-foreground">{n.title}</h3>
               <p className="text-sm text-muted-foreground">{n.message}</p>
               <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleString('th-TH')}</p>
@@ -267,6 +250,7 @@ const ProfNotifications = () => {
 
 const ProfProfile = () => {
   const { profile, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const [bio, setBio] = useState(profile?.bio || '');
   const [saving, setSaving] = useState(false);
 
@@ -281,14 +265,22 @@ const ProfProfile = () => {
 
   if (!profile) return null;
   return (
-    <div>
-      <h1 className="font-heading text-2xl font-bold text-foreground mb-6">โปรไฟล์</h1>
-      <div className="bg-card rounded-lg shadow-card p-6 max-w-xl space-y-4">
-        <div><Label className="text-muted-foreground">ชื่อ</Label><p className="font-medium text-foreground">{profile.first_name} {profile.last_name}</p></div>
-        <div><Label className="text-muted-foreground">ชื่อผู้ใช้</Label><p className="font-medium text-foreground">{profile.username}</p></div>
-        <div><Label className="text-muted-foreground">อีเมล</Label><p className="font-medium text-foreground">{profile.email}</p></div>
-        <div><Label>คำอธิบายตัวเอง</Label><Textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} /></div>
-        <Button onClick={handleSave} disabled={saving}>{saving ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+    <div className="animate-fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/professor')} className="shrink-0"><ArrowLeft size={18} /></Button>
+        <h1 className="font-heading text-xl md:text-2xl font-bold text-foreground">โปรไฟล์</h1>
+      </div>
+      <div className="bg-card rounded-2xl shadow-card p-6 max-w-xl space-y-6">
+        <div className="flex justify-center">
+          <AvatarUpload />
+        </div>
+        <div className="space-y-4">
+          <div><Label className="text-muted-foreground text-xs">ชื่อ</Label><p className="font-medium text-foreground">{profile.first_name} {profile.last_name}</p></div>
+          <div><Label className="text-muted-foreground text-xs">ชื่อผู้ใช้</Label><p className="font-medium text-foreground">{profile.username}</p></div>
+          <div><Label className="text-muted-foreground text-xs">อีเมล</Label><p className="font-medium text-foreground">{profile.email}</p></div>
+          <div><Label>คำอธิบายตัวเอง</Label><Textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} className="mt-1" /></div>
+          <Button onClick={handleSave} disabled={saving} className="w-full">{saving ? 'กำลังบันทึก...' : 'บันทึก'}</Button>
+        </div>
       </div>
     </div>
   );

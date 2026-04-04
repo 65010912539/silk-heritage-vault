@@ -15,6 +15,7 @@ interface Profile {
   bio: string | null;
   experience: string | null;
   verification_image_url: string | null;
+  avatar_url: string | null;
   status: AccountStatus;
 }
 
@@ -69,7 +70,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         setUser(session.user);
-        // Use setTimeout to avoid deadlock with Supabase auth
         setTimeout(() => fetchProfile(session.user.id), 0);
       } else {
         setUser(null);

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import PatternCard from '@/components/PatternCard';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, Shield, Upload, BookOpen, Users } from 'lucide-react';
 
 const useInView = (threshold = 0.1) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -20,9 +20,41 @@ const useInView = (threshold = 0.1) => {
   return { ref, inView };
 };
 
+const features = [
+  {
+    icon: Upload,
+    title: 'อัปโหลดลายผ้า',
+    description: 'บันทึกและอัปโหลดลวดลายผ้าไหมของคุณเข้าสู่ระบบ พร้อมรูปภาพหลายมุม',
+    gradient: 'from-blue-500/10 to-indigo-500/10',
+    iconColor: 'text-blue-600',
+  },
+  {
+    icon: Shield,
+    title: 'ตรวจสอบโดยผู้เชี่ยวชาญ',
+    description: 'ลายผ้าทุกชิ้นจะถูกตรวจสอบและยืนยันความถูกต้องโดยผู้เชี่ยวชาญด้านผ้าไหม',
+    gradient: 'from-emerald-500/10 to-teal-500/10',
+    iconColor: 'text-emerald-600',
+  },
+  {
+    icon: BookOpen,
+    title: 'คลังข้อมูลดิจิทัล',
+    description: 'เข้าถึงข้อมูลลวดลายผ้าไหมที่ผ่านการรับรองได้ทุกที่ ทุกเวลา',
+    gradient: 'from-amber-500/10 to-orange-500/10',
+    iconColor: 'text-amber-600',
+  },
+  {
+    icon: Users,
+    title: 'ชุมชนอนุรักษ์',
+    description: 'ร่วมเป็นส่วนหนึ่งในการอนุรักษ์มรดกทางวัฒนธรรมผ้าไหมไทย',
+    gradient: 'from-purple-500/10 to-pink-500/10',
+    iconColor: 'text-purple-600',
+  },
+];
+
 const Index = () => {
   const [approvedPatterns, setApprovedPatterns] = useState<any[]>([]);
   const showcase = useInView();
+  const featureSection = useInView();
 
   useEffect(() => {
     supabase
@@ -64,11 +96,36 @@ const Index = () => {
             </Link>
           </div>
         </div>
-        {approvedPatterns.length > 0 && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
-            <ChevronDown size={28} className="text-primary-foreground/40" />
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
+          <ChevronDown size={28} className="text-primary-foreground/40" />
+        </div>
+      </section>
+
+      {/* Features */}
+      <section ref={featureSection.ref} className="py-16 md:py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className={`font-heading text-2xl md:text-3xl font-bold text-center text-foreground mb-3 transition-all duration-700 ${featureSection.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            ทำไมต้อง ThaiSilk?
+          </h2>
+          <p className={`text-center text-muted-foreground mb-10 md:mb-14 max-w-lg mx-auto transition-all duration-700 delay-100 ${featureSection.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            แพลตฟอร์มที่ออกแบบมาเพื่อการอนุรักษ์ลายผ้าไหมอย่างยั่งยืน
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+            {features.map((f, i) => (
+              <div
+                key={i}
+                className={`group relative bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all duration-500 hover:-translate-y-2 ${featureSection.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                style={{ transitionDelay: `${200 + i * 100}ms` }}
+              >
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <f.icon size={26} className={f.iconColor} />
+                </div>
+                <h3 className="font-heading font-bold text-card-foreground mb-2">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </section>
 
       {/* Showcase */}

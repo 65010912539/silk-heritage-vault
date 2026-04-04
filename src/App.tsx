@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Route, Routes } from "react-router-dom"; // เปลี่ยนเป็น HashRouter
+import { HashRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +14,7 @@ import ProfessorDashboard from "./pages/ProfessorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
+import PublicProfile from "./pages/PublicProfile";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/library" element={<Library />} />
             <Route path="/pattern/:id" element={<PatternDetail />} />
+            <Route path="/profile/:userId" element={<PublicProfile />} />
             <Route path="/dashboard/user/*" element={<UserDashboard />} />
             <Route path="/dashboard/professor/*" element={<ProfessorDashboard />} />
             <Route path="/dashboard/admin/*" element={<AdminDashboard />} />
